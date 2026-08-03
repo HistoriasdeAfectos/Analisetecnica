@@ -2,25 +2,45 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Estado do repositório
+## Comandos
 
-Fase de desenho. **Não existe implementação, stack escolhida, build, testes nem
-linter.** O conteúdo actual são documentos de arquitectura. Quando surgir a
-primeira implementação, acrescentar aqui os comandos de build, lint e execução de
-testes (incluindo como correr um teste isolado).
+Python ≥3.10, sem build step. Não há linter configurado.
 
-A documentação está em português europeu — manter, incluindo em código novo,
-nomes de perfis e mensagens de commit.
+```bash
+python -m venv .venv && .venv/bin/pip install -e ".[dev]"   # instalar
+.venv/bin/pytest                                            # todos os testes
+.venv/bin/pytest tests/test_arquitectura.py                 # só as invariantes
+.venv/bin/pytest -k elevacao_do_joelho                      # um teste isolado
+.venv/bin/analisetecnica demo --perfil ciclismo             # pipeline sem vídeo
+.venv/bin/analisetecnica perfis --detalhe                   # métricas por perfil
+```
+
+O backend de pose real é opcional (`pip install -e ".[pose]"`) e exige o modelo
+`models/pose_landmarker.task` — ver README. Sem ele, `--backend synthetic` e os
+ficheiros JSON de keypoints cobrem todo o pipeline, que é como os testes correm.
+
+A documentação e o código estão em português europeu — manter, incluindo em
+comentários, nomes de perfis e mensagens de commit. Identificadores de métrica
+mantêm-se como estão nos documentos (`knee_lift_height`, `anchor_consistency`).
 
 ## Onde está o quê
 
+- `analisetecnica/core/` — pipeline agnóstico ao desporto.
+- `analisetecnica/sports/` — um módulo por desporto; importar o pacote regista-os.
+- `analisetecnica/sports/_common.py` — fábricas de métricas partilhadas. Vive em
+  `sports/` de propósito: é conveniência para escrever perfis, não parte do núcleo.
+- `tests/test_arquitectura.py` — as invariantes abaixo, verificadas
+  automaticamente. Se alterar a estrutura, é aqui que se vê o que se partiu.
+
+## Documentos de desenho
+
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — abstracções centrais, pipeline,
   modelo de pontuação e de dados. **Fonte de verdade** para qualquer decisão
-  estrutural.
+  estrutural; o código segue-o, e divergências são para corrigir num dos dois.
 - [`docs/CAPTURE.md`](docs/CAPTURE.md) — protocolo de captura, calibração,
   sincronização multicâmara.
-- [`docs/sports/`](docs/sports/) — um perfil por desporto: ciclismo, atletismo
-  (corrida), tiro com arco recurvo, natação, lançamentos.
+- [`docs/sports/`](docs/sports/) — um perfil por desporto, com métricas, bandas e
+  riscos. Cada módulo em `sports/` implementa o documento homónimo.
 
 ## O que o software faz
 
@@ -81,6 +101,16 @@ Todos os limites de banda e pesos de pontuação nos perfis são **pontos de par
 a validar com treinadores**, não constantes estabelecidas. Não os endurecer em
 código sem essa validação, e mantê-los editáveis na interface — os pesos são
 juízo de treinador.
+
+## Por implementar
+
+- **Tracking de objectos** (arco, bicicleta, engenho). Bloqueia as métricas de
+  deriva da mira no arco e de ângulo/velocidade de largada nos lançamentos.
+- **Triangulação multicâmara 3D.** O modelo de dados já a prevê (`SyncGroup`),
+  o cálculo não existe.
+- **Geradores sintéticos** para natação e lançamentos — os outros três têm.
+- **Interface gráfica**, incluindo a revisão manual dos eventos de contacto, que
+  o perfil de corrida assume existir.
 
 ## Riscos técnicos assumidos
 

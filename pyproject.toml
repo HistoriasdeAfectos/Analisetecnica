@@ -1,0 +1,31 @@
+[project]
+name = "analisetecnica"
+version = "0.1.0"
+description = "Análise técnica corporal a partir de vídeo e fotografia, multidesporto"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+]
+
+[project.optional-dependencies]
+# Backend de pose real. Sem isto o pacote corre na mesma, com o backend
+# sintético e com dados de pose já extraídos (JSON).
+pose = [
+    "mediapipe>=0.10",
+    "opencv-python-headless>=4.8",
+]
+dev = ["pytest>=7"]
+
+[project.scripts]
+analisetecnica = "analisetecnica.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["analisetecnica*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

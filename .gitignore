@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Modelo de pose (~9 MB), descarregado localmente — ver README
+models/
+
+# Keypoints e relatórios de sessões reais
+sessoes/
+*.mp4
+*.mov
